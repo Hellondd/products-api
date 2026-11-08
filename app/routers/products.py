@@ -16,3 +16,10 @@ def create_product(data: ProductCreate, db: Session = Depends(get_db)):
             "Product with this name already exists",
         )
     return crud.create_product(db, data)
+    
+@router.get("/{product_id}", response_model=ProductRead)
+def get_product(product_id: int, db: Session = Depends(get_db)):
+    product = crud.get_product(db, product_id)
+    if not product:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Product not found")
+    return product
