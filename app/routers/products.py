@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app import crud
@@ -8,14 +8,14 @@ from app.schemas import ProductCreate, ProductRead
 router = APIRouter(prefix="/products", tags=["products"])
 
 
-@router.post("", response_model=ProductRead, status_code=status.HTTP_201_CREATED)
-def create_product(data: ProductCreate, db: Session = Depends(get_db)):
-    if crud.get_product_by_name(db, data.name):
-        raise HTTPException(
-            status.HTTP_409_CONFLICT,
-            "Product with this name already exists",
-        )
-    return crud.create_product(db, data)
+@router.get("", response_model=list[ProductRead])
+def list_products(
+    min_price: int | None = Query(default=None, ge=0),
+    max_price: int | None = Query(default=None, ge=0),
+    in_stock: bool | None = None,
+    db: Session = Depends(get_db),
+):
+    return crud.list_products(db, min_price, max_price, in_stock)
     
 @router.get("/{product_id}", response_model=ProductRead)
 def get_product(product_id: int, db: Session = Depends(get_db)):

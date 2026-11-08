@@ -19,6 +19,17 @@ def create_product(db: Session, data: ProductCreate) -> Product:
     db.commit()
     db.refresh(product)
     return product
-
-def list_products(db: Session) -> list[Product]:
-    return list(db.scalars(select(Product).order_by(Product.id)))
+def list_products(
+    db: Session,
+    min_price: int | None = None,
+    max_price: int | None = None,
+    in_stock: bool | None = None,
+) -> list[Product]:
+    stmt = select(Product)
+    if min_price is not None:
+        stmt = stmt.where(Product.price >= min_price)
+    if max_price is not None:
+        stmt = stmt.where(Product.price <= max_price)
+    if in_stock is not None:
+        stmt = stmt.where(Product.in_stock == in_stock)
+    return list(db.scalars(stmt.order_by(Product.id)))
