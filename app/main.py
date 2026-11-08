@@ -1,5 +1,10 @@
 from fastapi import FastAPI
 
+from app.database import Base, engine
+from app import models  # noqa: F401  (нужно, чтобы модель зарегистрировалась в Base)
+
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(title="Products API", version="1.0.0")
 
 
