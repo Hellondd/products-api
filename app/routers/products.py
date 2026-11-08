@@ -15,6 +15,11 @@ def list_products(
     in_stock: bool | None = None,
     db: Session = Depends(get_db),
 ):
+    if min_price is not None and max_price is not None and min_price > max_price:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "min_price must be less than or equal to max_price",
+        )
     return crud.list_products(db, min_price, max_price, in_stock)
     
 @router.get("/{product_id}", response_model=ProductRead)
