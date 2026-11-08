@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app import crud
 from app.database import get_db
-from app.schemas import ProductCreate, ProductRead
+from app.schemas import ProductCreate, ProductRead, ProductUpdate
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -28,3 +28,16 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
     if not product:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Product not found")
     return product
+
+@router.put("/{product_id}", response_model=ProductRead)
+def replace_product(product_id: int, data: ProductUpdate, db: Session = Depends(get_db)):
+    product = crud.get_product(db, product_id)
+    if not product:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Product not found")
+    other = crud.get_product_by_name(db, data.name)
+    if other and other.id != product_id:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "Product with this name already exists",
+        )
+    return crud.update_product(db, product, data)

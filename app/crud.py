@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Product
-from app.schemas import ProductCreate
+from app.schemas import ProductCreate, ProductUpdate
 
 
 def get_product(db: Session, product_id: int) -> Product | None:
@@ -33,3 +33,10 @@ def list_products(
     if in_stock is not None:
         stmt = stmt.where(Product.in_stock == in_stock)
     return list(db.scalars(stmt.order_by(Product.id)))
+
+def update_product(db: Session, product: Product, data: ProductUpdate) -> Product:
+    for field, value in data.model_dump().items():
+        setattr(product, field, value)
+    db.commit()
+    db.refresh(product)
+    return product
