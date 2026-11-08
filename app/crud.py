@@ -19,3 +19,6 @@ def create_product(db: Session, data: ProductCreate) -> Product:
     db.commit()
     db.refresh(product)
     return product
+
+def list_products(db: Session) -> list[Product]:
+    return list(db.scalars(select(Product).order_by(Product.id)))
