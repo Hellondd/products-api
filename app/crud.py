@@ -40,3 +40,7 @@ def update_product(db: Session, product: Product, data: ProductUpdate) -> Produc
     db.commit()
     db.refresh(product)
     return product
+
+def delete_product(db: Session, product: Product) -> None:
+    db.delete(product)
+    db.commit()

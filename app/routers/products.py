@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app import crud
@@ -41,3 +41,11 @@ def replace_product(product_id: int, data: ProductUpdate, db: Session = Depends(
             "Product with this name already exists",
         )
     return crud.update_product(db, product, data)
+
+@router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_product(product_id: int, db: Session = Depends(get_db)):
+    product = crud.get_product(db, product_id)
+    if not product:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Product not found")
+    crud.delete_product(db, product)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
